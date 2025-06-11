@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  fullName String
+  password String 
+  profile Profile?
+  role Role
+  jobs Job[]
+  applications JobApplication[]
+}
+
+enum Role{
+  JOB_SEEKER
+  EMPLOYER
+  ADMIN
+}
+enum Gender{
+  MALE
+  FEMALE
+}
+
+enum JOBTYPE{
+  Onsite
+  Remote
+  Hybrid
+}
+
+model Profile{
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  tagline String?
+  profilePic String?
+  resume String?
+  gender Gender
+  phoneNumber String?
+  bio String?
+  skills String[]
+  experience Int
+  user User @relation(fields: [userId],references: [id])
+}
+
+model Job{
+  id Int @id @default(autoincrement())
+  companyEmail  String  @default("unknown@example.com") 
+  companyName   String  @default("Unknown Company")
+  title String
+  description String
+  salary Int?
+  location String
+  companyLogo String?
+  jobType JOBTYPE @default(Onsite)
+  experience Int ?
+  availabe_seats Int @default(3)
+  skills String[]
+  employerId Int
+  employer User @relation(fields: [employerId],references: [id])
+  applicants JobApplication[]
+  createdAt DateTime @default(now())
+}
+
+model JobApplication{
+  id Int @id @default(autoincrement())
+  jobId Int
+  job Job @relation(fields: [jobId],references: [id],onDelete: Cascade)
+  userId Int
+  user User @relation(fields: [userId],references: [id])
+  resume String?
+  status String @default("pending")
+  createdAt DateTime @default(now())
+}
