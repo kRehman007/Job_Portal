@@ -82,7 +82,7 @@ export const userLogin = async (req: Request, res: Response) => {
 };
 
 export const userLogout = (req: Request, res: Response) => {
-  console.log("user logout called");
+
   try {
     res.clearCookie("token", {
       httpOnly: true,

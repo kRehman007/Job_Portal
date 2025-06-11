@@ -86,7 +86,6 @@ export const deleteJob = async (req: Request, res: Response) => {
     // await redis.del(`applied-jobs-${req.user.id}`);
     // await redis.del(`employer-jobs-${req.user.id}`);
     // await redis.del(`applicants-${jobId}`);
-
     res.status(200).json({ message: "Job deleted successfully" });
   } catch (error: any) {
     console.error("Error in  deleting-job controller:", error.message);
@@ -197,7 +196,6 @@ export const applyForJob = async (req: Request, res: Response) => {
 export const updateApplicationStatus = async (req: Request, res: Response) => {
   const { status } = req.body;
   const { id } = req.params;
-  console.log(id, status);
   if (!status || !id) {
     res.status(400).json({ error: "Status or Id is required" });
     return;

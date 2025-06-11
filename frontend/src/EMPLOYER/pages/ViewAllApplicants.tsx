@@ -27,8 +27,7 @@ import toast from "react-hot-toast";
 import ProfileModal from "../../JOB_SEEKER/components/modals/ProfileModal";
 
 const ViewAllApplicants = () => {
-  const [isAcceptingStatus, setIsAcceptingStatus] = useState(false);
-  const [isRejectingStatus, setIsRejectingStatus] = useState(false);
+  const [loadingStates, setLoadingStates] = useState<Record<number, 'approving' | 'rejecting' | null>>({});
   const [updateApplicationStatus] = useUpdateApplicationStatusMutation();
   const [page, setPage] = useState(1);
   const itemsPerPage = 2;
@@ -54,21 +53,17 @@ const ViewAllApplicants = () => {
     );
   }
 
-  async function handleApplicationStatus(id: number, status: string) {
-    if (status === "approved") {
-      setIsAcceptingStatus(true);
-    } else if (status === "rejected") {
-      setIsRejectingStatus(true);
-    }
+  async function handleApplicationStatus(id: number, status: 'approved' | 'rejected') {
+    setLoadingStates(prev => ({ ...prev, [id]: status === 'approved' ? 'approving' : 'rejecting' }));
+    
     try {
       await updateApplicationStatus({ id, data: status }).unwrap();
-      toast.success(`${status} successfully`);
+      toast.success(`Application ${status} successfully`);
     } catch (error: any) {
       console.log("error in updating status", error.message);
       toast.error("Oops..!! something went wrong");
     } finally {
-      setIsAcceptingStatus(false);
-      setIsRejectingStatus(false);
+      setLoadingStates(prev => ({ ...prev, [id]: null }));
     }
   }
 
@@ -271,13 +266,13 @@ const ViewAllApplicants = () => {
                             variant="contained"
                             sx={{ textTransform: "capitalize" }}
                             color="success"
-                            disabled={isAcceptingStatus}
+                            disabled={loadingStates[applicant.id] === 'approving' || loadingStates[applicant.id] === 'rejecting'}
                             fullWidth
                             onClick={() =>
                               handleApplicationStatus(applicant.id, "approved")
                             }
                           >
-                            {isAcceptingStatus ? (
+                            {loadingStates[applicant.id] === 'approving' ? (
                               <CircularProgress size={24} color="inherit" />
                             ) : (
                               "Approve"
@@ -287,13 +282,13 @@ const ViewAllApplicants = () => {
                             variant="contained"
                             color="error"
                             sx={{ textTransform: "capitalize" }}
-                            disabled={isRejectingStatus}
+                            disabled={loadingStates[applicant.id] === 'rejecting' || loadingStates[applicant.id] === 'approving'}
                             fullWidth
                             onClick={() =>
                               handleApplicationStatus(applicant.id, "rejected")
                             }
                           >
-                            {isRejectingStatus ? (
+                            {loadingStates[applicant.id] === 'rejecting' ? (
                               <CircularProgress size={24} color="inherit" />
                             ) : (
                               "Reject"
@@ -348,7 +343,6 @@ const ViewAllApplicants = () => {
         )}
 
         {/* Bio Modal */}
-
         <Modal open={openModal} onClose={() => setOpenModal(false)}>
           <Box
             sx={{

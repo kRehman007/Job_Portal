@@ -1,4 +1,11 @@
-import { Box, Button, Stack, Typography, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  Stack,
+  Typography,
+  Paper,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
   useDeleteJobMutation,
@@ -12,18 +19,25 @@ import {
   MdAccessTime,
   MdPeople,
 } from "react-icons/md";
+import { useState } from "react";
 
 const ViewAllEmployerJobs = () => {
   const navigate = useNavigate();
-  const { data } = useGetEmployerPostedJobsQuery();
-  const [deleteJob, { isLoading }] = useDeleteJobMutation();
+  const { data, refetch } = useGetEmployerPostedJobsQuery();
+  const [deleteJob] = useDeleteJobMutation();
+
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
 
   async function handleDeleteJob(jobId: string | number) {
+    setDeletingId(jobId);
     try {
       await deleteJob({ jobId }).unwrap();
       toast.success("Job deleted successfully");
+      await refetch(); // Refresh the job list
     } catch (error: any) {
       toast.error(error.data?.error || "Failed to delete job");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -57,9 +71,9 @@ const ViewAllEmployerJobs = () => {
                   new Date(b.createdAt).getTime() -
                   new Date(a.createdAt).getTime()
               )
-              .map((job: any, index: number) => (
+              .map((job: any) => (
                 <Paper
-                  key={index}
+                  key={job.id}
                   elevation={0}
                   sx={{
                     p: 3,
@@ -148,14 +162,19 @@ const ViewAllEmployerJobs = () => {
                       variant="contained"
                       color="error"
                       onClick={() => handleDeleteJob(job.id)}
-                      disabled={isLoading}
+                      disabled={deletingId === job.id}
                       sx={{
                         textTransform: "none",
                         fontWeight: 500,
                       }}
                     >
-                      {isLoading ? "Deleting..." : "Delete"}
+                      {deletingId === job.id ? (
+                        <CircularProgress size={24} color="inherit" />
+                      ) : (
+                        "Delete"
+                      )}
                     </Button>
+
                     <Button
                       fullWidth
                       variant="contained"

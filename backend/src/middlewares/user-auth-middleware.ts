@@ -3,7 +3,6 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import prisma from "../db/prisma";
 import { Role } from "@prisma/client";
 
-console.log("secret", process.env.JWT_SECRET);
 interface DecodedToken extends JwtPayload {
   userId: number;
 }
@@ -21,21 +20,20 @@ export const AuthUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("Cookies:", req.cookies?.token ? "EXISTS" : "MISSING");
-  console.log("Auth Header:", req.headers.authorization ? "EXISTS" : "MISSING");
+
   const token = req.headers["authorization"]?.split(" ")[1];
-  console.log("token", token);
+
   if (!token) {
     res.status(401).json({ error: "unAuthorized" });
     return;
   }
-  console.log("token", token);
+
   try {
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
     ) as DecodedToken;
-    console.log("Decoded token:", decoded);
+
     if (!decoded.userId) {
       res.status(401).json({ error: "unAuthorized as Token expired " });
       return;

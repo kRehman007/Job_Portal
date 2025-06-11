@@ -1,3 +1,4 @@
+// 👇 FIXED VERSION OF EmployerDashboard.tsx
 import * as React from "react";
 import {
   Box,
@@ -12,10 +13,7 @@ import { useAppSelector } from "../../utils/useAppandDispatch";
 import Loader from "../../JOB_SEEKER/components/Loader";
 import EmployerSideBar from "../components/EmployerSideBar";
 import { FaBriefcase, FaUsers } from "react-icons/fa";
-import {
-  useGetAllApplicantsQuery,
-  useGetEmployerPostedJobsQuery,
-} from "../../JOB_SEEKER/Redux/API/JobsAPI";
+import { useGetEmployerPostedJobsQuery } from "../../JOB_SEEKER/Redux/API/JobsAPI";
 
 const ViewAllEmployerJobs = React.lazy(
   () => import("../components/ViewAllEmployerJobs")
@@ -24,27 +22,26 @@ const ViewAllEmployerJobs = React.lazy(
 export const drawerWidth = 300;
 
 export default function EmployerDashboard() {
-  const { data: ActiveJobs } = useGetEmployerPostedJobsQuery();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { user } = useAppSelector((state) => state.user);
-  const applicantsData = ActiveJobs?.map((job: any) =>
-    useGetAllApplicantsQuery({ id: job.id })
-  );
 
-  // Calculate total applicants
-  const totalApplicants = applicantsData?.reduce(
-    (total: number, queryResult: any) => {
-      return total + (queryResult?.data?.length || 0);
-    },
-    0
-  );
+  const {
+    data: ActiveJobs = [],
+    isLoading: jobsLoading,
+    error: jobsError,
+  } = useGetEmployerPostedJobsQuery();
+
+  // TEMPORARY: totalApplicants will be shown inside ViewAllEmployerJobs
+  const totalApplicants = 0;
 
   const dashboardStats = [
     { value: ActiveJobs.length, label: "Active Jobs", icon: <FaBriefcase /> },
     { value: totalApplicants, label: "Total Applicants", icon: <FaUsers /> },
   ];
+
+  if (jobsLoading) return <Loader />;
+  if (jobsError) return <div>Error loading jobs</div>;
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -58,7 +55,6 @@ export default function EmployerDashboard() {
       >
         <Toolbar />
 
-        {/* Dashboard Content */}
         <Container maxWidth="xl" sx={{ py: 4, pt: { md: 0 }, px: 3 }}>
           {/* Welcome Section */}
           <Typography
@@ -89,6 +85,7 @@ export default function EmployerDashboard() {
               Here is an overview of your posted jobs and recent applications.
             </Typography>
           </Typography>
+
           {/* Stats Cards */}
           <Box
             sx={{
@@ -129,6 +126,7 @@ export default function EmployerDashboard() {
               </Paper>
             ))}
           </Box>
+
           {/* Jobs Section */}
           <Box sx={{ mt: 4 }}>
             <Typography variant={isMobile ? "h5" : "h4"} fontWeight={700}>

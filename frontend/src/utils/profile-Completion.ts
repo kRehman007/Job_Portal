@@ -4,14 +4,7 @@ let ResumeScore = 0;
 let SkillsScore = 0;
 let BioScore = 0;
 
-console.log(
-  "profile-Completion.ts",
-  PhoneNumberScore,
-  TaglineScore,
-  ResumeScore,
-  SkillsScore,
-  BioScore
-);
+
 export function checkProfileCompletion(UserProfile: any) {
   if (UserProfile?.profile?.phoneNumber) PhoneNumberScore = 15;
   if (UserProfile?.profile?.tagline) TaglineScore = 15;

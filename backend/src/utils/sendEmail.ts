@@ -62,7 +62,7 @@ export const sendEmailForApplying = async (
   `;
 
   await transporter.sendMail({
-    from: `"Job Portal from Company Name"`,
+      from: `"Job Portal" <${process.env.EMAIL_USER}>`,
     to,
     subject: "Application Received – Thank You for Applying",
     html: htmlContent,
