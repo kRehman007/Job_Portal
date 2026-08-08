@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { URL } from "../../utils/URL";
 import { ArrowBack } from "@mui/icons-material";
 import { CloudUpload } from "@mui/icons-material";
+import { FaBuilding, FaFileAlt } from "react-icons/fa";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -129,21 +130,21 @@ const CreateJob = () => {
   return (
     <Box
       sx={{
-        maxWidth: "800px",
+        maxWidth: "840px",
         mx: "auto",
         p: { xs: 2, sm: 4 },
         mt: { xs: 2, sm: 4 },
       }}
     >
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
-          p: { xs: 2, sm: 4 },
-          borderRadius: 3,
-          bgcolor: "background.paper",
+          p: { xs: 2.5, sm: 4 },
+          borderRadius: "20px",
+          bgcolor: "#fff",
+          border: "1px solid #e2e8f0",
         }}
       >
-        {/* Header with back button */}
         <Box
           sx={{
             display: "flex",
@@ -154,24 +155,33 @@ const CreateJob = () => {
         >
           <IconButton
             onClick={() => navigate(URL.EMPLOYER.HOME)}
-            sx={{ color: "primary.main" }}
+            sx={{
+              color: "#6d28d9",
+              bgcolor: "#f5f3ff",
+              "&:hover": { bgcolor: "#ede9fe" },
+            }}
           >
             <ArrowBack />
           </IconButton>
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{
-              fontWeight: "bold",
-              background: "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              lineHeight: 1.2,
-              fontSize: { xs: "25px", sm: "32px" },
-            }}
-          >
-            Create New Job
-          </Typography>
+          <Box>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
+                fontWeight: 800,
+                background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                lineHeight: 1.2,
+                fontSize: { xs: "25px", sm: "32px" },
+              }}
+            >
+              Create New Job
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Fill in the details to post a new opportunity
+            </Typography>
+          </Box>
         </Box>
 
         <Divider sx={{ mb: 4 }} />
@@ -182,16 +192,26 @@ const CreateJob = () => {
           sx={{ display: "flex", flexDirection: "column", gap: 3 }}
         >
           <Grid container spacing={3}>
-            {/* Company Information */}
             <Grid item xs={12}>
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                fontStyle={"italic"}
-                color="primary"
-              >
-                Company Information
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                    color: "#fff",
+                  }}
+                >
+                  <FaBuilding size={18} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} color="#1e293b">
+                  Company Information
+                </Typography>
+              </Box>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -247,8 +267,21 @@ const CreateJob = () => {
                       variant="outlined"
                       startIcon={<CloudUpload />}
                       fullWidth
+                      sx={{
+                        borderRadius: "12px",
+                        py: 1.5,
+                        color: "#6d28d9",
+                        borderColor: "#c4b5fd",
+                        fontWeight: 600,
+                        "&:hover": {
+                          borderColor: "#6d28d9",
+                          bgcolor: "#f5f3ff",
+                        },
+                      }}
                     >
-                      {selectedFile ? selectedFile.name : "Upload Company Logo"}
+                      {selectedFile
+                        ? selectedFile.name
+                        : "Upload Company Logo"}
                     </Button>
                     {errors.companyLogo && (
                       <Typography variant="caption" color="error" mt={1}>
@@ -260,16 +293,26 @@ const CreateJob = () => {
               />
             </Grid>
 
-            {/* Job Details */}
             <Grid item xs={12}>
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                color="primary"
-                fontStyle={"italic"}
-              >
-                Job Details
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "linear-gradient(135deg, #0ea5e9, #06b6d4)",
+                    color: "#fff",
+                  }}
+                >
+                  <FaFileAlt size={18} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} color="#1e293b">
+                  Job Details
+                </Typography>
+              </Box>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -396,7 +439,6 @@ const CreateJob = () => {
               />
             </Grid>
 
-            {/* Skills Section */}
             <Grid item xs={12}>
               <Controller
                 name="skills"
@@ -420,9 +462,14 @@ const CreateJob = () => {
                           key={index}
                           label={skill}
                           onDelete={() => handleSkillDelete(skill)}
-                          color="primary"
-                          variant="outlined"
-                          sx={{ borderRadius: 1 }}
+                          sx={{
+                            borderRadius: "8px",
+                            bgcolor: "#f5f3ff",
+                            color: "#6d28d9",
+                            border: "1px solid #ddd6fe",
+                            fontWeight: 600,
+                            "& .MuiChip-deleteIcon": { color: "#6d28d9" },
+                          }}
                         />
                       ))}
                     </Box>
@@ -437,7 +484,6 @@ const CreateJob = () => {
             </Grid>
           </Grid>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             variant="contained"
@@ -447,11 +493,17 @@ const CreateJob = () => {
             disabled={isSubmitting}
             sx={{
               mt: 2,
-              py: 1,
-              borderRadius: 2,
-              fontWeight: "bold",
-              fontSize: "1rem",
-              textTransform: "capitalize",
+              py: 1.5,
+              borderRadius: "14px",
+              fontWeight: 700,
+              fontSize: "1.05rem",
+              background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+              boxShadow: "0 8px 20px rgba(99, 102, 241, 0.35)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #7c3aed 0%, #4338ca 100%)",
+                boxShadow: "0 10px 26px rgba(99, 102, 241, 0.45)",
+                transform: "translateY(-1px)",
+              },
             }}
           >
             {isSubmitting ? (

@@ -1,119 +1,127 @@
-import { Box, Container, Toolbar, Typography } from "@mui/material";
+import { Box, Container, Paper, Toolbar, Typography } from "@mui/material";
 import UserSideBar from "../components/UserSideBar";
-import { drawerWidth } from "./UserDashboard";
+import MainLayout from "../../components/MainLayout";
 import CustomBarChart from "../../charts/BarChart";
 import CustomRadialBarChart from "../../charts/RadialBarChart";
+import { FiBarChart2, FiPieChart } from "react-icons/fi";
 
 const UserAnalytics = () => {
   return (
-    <Box sx={{ display: "flex", pb: 2, width: "100%", overflow: "hidden" }}>
-      <UserSideBar />
-      <Box
-        component="main"
+    <MainLayout sidebar={<UserSideBar />}>
+      <Toolbar />
+
+      <Container
         sx={{
-          flexGrow: 1,
-          mt: { xs: 4, sm: 0 },
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          maxWidth: "100vw",
+          px: { xs: 2.5, sm: 4 },
         }}
       >
-        <Toolbar />
-
-        {/* Container... */}
-        <Container
-          sx={{
-            maxWidth: "100vw",
-          }}
-        >
-          {/* Page Introduction */}
           <Typography
-            color="secondary"
-            fontWeight={"bold"}
+            fontWeight={800}
             sx={{
               fontSize: { xs: "25px", sm: "32px" },
               mt: { xs: 2, sm: 0 },
-              background: "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
+              background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
             Job Analytics Dashboard
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Tracking job applications is crucial for understanding job trends
-            and user engagement. This dashboard provides insights into job
-            postings, user applications, and preferences. The visual charts
-            below illustrate the number of jobs posted each month, the status of
-            job applications, and users' favorite job listings. By analyzing
-            these metrics, users can track their job search progress, identify
-            trends, and make informed career decisions.
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 4, mt: 1, maxWidth: 760 }}
+          >
+            Gain insights into your job search — monthly posting trends and a
+            live overview of your application outcomes.
           </Typography>
 
           <Box
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column", lg: "row" },
-              justifyContent: { xs: "center", lg: "space-between" },
-              alignItems: "center",
-              gap: 5,
-              mt: 4,
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: 4,
             }}
           >
-            {/* BARCHART... */}
-            <Box sx={{ textAlign: "center", mt: { xs: 3, lg: 0.5 }, p: 2 }}>
-              <Typography
-                variant="h5"
-                fontWeight={700}
-                sx={{
-                  background:
-                    "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Monthly Job Posting Trends
-              </Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 4 }}>
-                This bar chart represents the number of jobs posted each month,
-                giving a clear overview of job availability trends throughout
-                the year.
-              </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 2.5, sm: 4 },
+                borderRadius: "18px",
+                border: "1px solid #e2e8f0",
+                background: "#fff",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                    color: "#fff",
+                    flexShrink: 0,
+                  }}
+                >
+                  <FiBarChart2 size={20} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" fontWeight={700} color="#1e293b">
+                    Monthly Job Posting Trends
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Number of jobs posted each month
+                  </Typography>
+                </Box>
+              </Box>
 
               <CustomBarChart />
-            </Box>
+            </Paper>
 
-            {/* RADIAL BARCHART... */}
-            <Box sx={{ p: 2, textAlign: "center", mt: -3 }}>
-              <Typography
-                variant="h5"
-                fontWeight={700}
-                sx={{
-                  background:
-                    "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Job Application Status Overview
-              </Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ px: 2 }}>
-                This radial bar chart provides an overview of job applications,
-                displaying the number of applied and favourites jobs and
-                pending, accepted, and rejected applications.
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <CustomRadialBarChart />
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 2.5, sm: 4 },
+                borderRadius: "18px",
+                border: "1px solid #e2e8f0",
+                background: "#fff",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "linear-gradient(135deg, #f472b6, #8b5cf6)",
+                    color: "#fff",
+                    flexShrink: 0,
+                  }}
+                >
+                  <FiPieChart size={20} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" fontWeight={700} color="#1e293b">
+                    Job Application Status
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Applied, favourite, pending, accepted & rejected
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
+
+              <CustomRadialBarChart />
+            </Paper>
           </Box>
-        </Container>
-      </Box>
-    </Box>
+      </Container>
+    </MainLayout>
   );
 };
 

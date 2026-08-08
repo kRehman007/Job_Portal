@@ -12,7 +12,7 @@ export const JobsAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["userProfile", "applicants", "deleteJob"],
+  tagTypes: ["userProfile", "applicants", "deleteJob", "appliedJobs"],
 
   endpoints: (builder) => ({
     getAllJobs: builder.query<any, void>({
@@ -20,6 +20,7 @@ export const JobsAPI = createApi({
     }),
     getAppliedJobs: builder.query<any, void>({
       query: () => "/job/applied-jobs",
+      providesTags: ["appliedJobs"],
     }),
     getUserProfile: builder.query<any, void>({
       query: () => "/user/get-profile",
@@ -38,6 +39,7 @@ export const JobsAPI = createApi({
         url: `/job/apply-job/${jobId}`,
         method: "POST", // Change it to POST if applying for a job requires a request body.
       }),
+      invalidatesTags: ["appliedJobs"],
     }),
 
     getEmployerPostedJobs: builder.query<any, void>({
@@ -46,7 +48,7 @@ export const JobsAPI = createApi({
     }),
     createJob: builder.mutation<any, any>({
       query: (formData) => ({
-        url: "/job/create-job",
+        url: "/job/post-job",
         method: "POST",
         body: formData,
       }),
@@ -66,7 +68,7 @@ export const JobsAPI = createApi({
         method: "PUT",
         body: { status: data },
       }),
-      invalidatesTags: ["applicants"],
+      invalidatesTags: ["applicants", "appliedJobs"],
     }),
 
     deleteJob: builder.mutation<any, { jobId: string | number }>({

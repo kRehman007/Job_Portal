@@ -34,18 +34,9 @@ const EditSchema = z.object({
     .refine((file) => !file || file.size <= MAX_FILE_SIZE, {
       message: "Resume file must not exceed 5MB",
     })
-    .refine(
-      (file) =>
-        file
-          ? [
-              "application/msword",
-              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            ].includes(file.type)
-          : true,
-      {
-        message: "Please upload a Docs or DOC file",
-      }
-    ),
+    .refine((file) => (file ? file.type === "application/pdf" : true), {
+      message: "Please upload a PDF file",
+    }),
 
   profilePic: z
     .instanceof(File)
@@ -93,9 +84,11 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
     },
   });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(
-    data?.profile?.resume
-  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const existingResume = data?.profile?.resume;
+  const existingResumeName = existingResume
+    ? decodeURIComponent(existingResume.split("/").pop() || "")
+    : null;
   const [skillInput, setSkillInput] = useState("");
   const [pic, setPic] = useState<string | null>(null);
   const [updateUserProfile] = useUpdateUserProfileMutation();
@@ -167,22 +160,32 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
       <Box
         display={"flex"}
         justifyContent={"center"}
+        alignItems={"center"}
         position={"relative"}
         width={"100%"}
-        sx={{ mt: { xs: "27px", sm: "27px" } }}
+        sx={{ mt: 1, mb: 1 }}
       >
-        <Typography sx={{ fontSize: "19px" }}>Edit Profile</Typography>
         <BiArrowBack
           onClick={handleEditModalClose}
           style={{
             position: "absolute",
-            top: "0px",
             left: "0px",
-
-            fontSize: "25px",
+            fontSize: "22px",
             cursor: "pointer",
+            color: "#64748b",
           }}
         />
+        <Typography
+          sx={{
+            fontSize: "20px",
+            fontWeight: 800,
+            background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Edit Profile
+        </Typography>
       </Box>
 
       <Box
@@ -195,21 +198,29 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
             data?.profile?.profilePic ||
             `https://avatar.iran.liara.run/public/boy?username=${data?.fullName}`
           }
-          className="w-20 h-20 rounded-full object-fill border-1 border-blue-500"
+          className="w-24 h-24 rounded-full object-cover"
+          style={{
+            border: "3px solid #e9d5ff",
+            boxShadow: "0 8px 20px rgba(139, 92, 246, 0.25)",
+          }}
         />
         {errors.profilePic && (
           <Typography variant="body2" color="error">
-            {errors.profilePic.message as string} 
+            {errors.profilePic.message as string}
           </Typography>
         )}
 
         <IoCameraReverse
           style={{
             position: "absolute",
-            right: "2px",
-            bottom: "7px",
-            fontSize: "27px",
-            color: "blue",
+            right: "-2px",
+            bottom: "4px",
+            fontSize: "26px",
+            color: "#6d28d9",
+            background: "#fff",
+            borderRadius: "50%",
+            padding: "2px",
+            boxShadow: "0 2px 8px rgba(30,41,59,0.2)",
           }}
         />
 
@@ -277,7 +288,7 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
               {/* Hidden file input */}
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf"
                 style={{ display: "none" }}
                 id="resume-upload"
                 onChange={(e) => {
@@ -290,16 +301,61 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
               {/* Custom TextField as File Upload */}
               <label htmlFor="resume-upload">
                 <Button
-                  variant="contained"
-                  color="primary"
+                  variant="outlined"
                   component="span"
                   fullWidth
-                  sx={{ mb: 1 }}
+                  sx={{
+                    mb: 1,
+                    borderRadius: "10px",
+                    py: 1.25,
+                    color: "#6d28d9",
+                    borderColor: "#c4b5fd",
+                    fontWeight: 600,
+                    "&:hover": { borderColor: "#6d28d9", bgcolor: "#f5f3ff" },
+                  }}
                 >
-                  <Upload size={16} color="white" />
-                  Upload Resume
+                  <Upload size={16} style={{ marginRight: 6 }} />
+                  {selectedFile ? "Change Resume" : "Upload Resume"}
                 </Button>
               </label>
+              {!selectedFile && existingResume && (
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1,
+                    bgcolor: "#f5f3ff",
+                    borderRadius: "10px",
+                    px: 1.5,
+                    py: 1,
+                    border: "1px dashed #c4b5fd",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Current: {existingResumeName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    component="a"
+                    href={existingResume}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ color: "#6d28d9", fontWeight: 700, flexShrink: 0 }}
+                  >
+                    View
+                  </Typography>
+                </Box>
+              )}
               {selectedFile && (
                 <Typography variant="body2" color="text.secondary">
                   {selectedFile.name}
@@ -395,7 +451,18 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
           color="primary"
           fullWidth
           disabled={isSubmitting}
-          sx={{ textTransform: "capitalize" }}
+          sx={{
+            py: 1.4,
+            borderRadius: "12px",
+            fontWeight: 700,
+            fontSize: "15px",
+            background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+            boxShadow: "0 6px 16px rgba(99, 102, 241, 0.35)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #7c3aed, #4338ca)",
+              boxShadow: "0 8px 20px rgba(99, 102, 241, 0.45)",
+            },
+          }}
         >
           {isSubmitting ? (
             <CircularProgress size={24} color="inherit" />

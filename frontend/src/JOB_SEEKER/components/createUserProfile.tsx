@@ -199,7 +199,7 @@ const CreateProfilePage: React.FC = () => {
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf"
                 onChange={handleResumeChange}
                 style={{ display: "none" }}
                 id="resume-upload"

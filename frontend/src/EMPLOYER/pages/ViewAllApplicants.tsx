@@ -4,7 +4,6 @@ import {
   CardContent,
   Typography,
   Box,
-  Container,
   Toolbar,
   Chip,
   Grid,
@@ -12,22 +11,27 @@ import {
   Modal,
   Pagination,
   CircularProgress,
+  Container,
 } from "@mui/material";
 import { AiOutlineClose } from "react-icons/ai";
-import { useLocation } from "react-router-dom";
+import { FaUsers } from "react-icons/fa";
+import { AiOutlineArrowLeft } from "react-icons/ai";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   useGetAllApplicantsQuery,
   useUpdateApplicationStatusMutation,
 } from "../../JOB_SEEKER/Redux/API/JobsAPI";
-import { drawerWidth } from "./EmployerDashboard";
 import EmployerSideBar from "../components/EmployerSideBar";
+import MainLayout from "../../components/MainLayout";
 import Loader from "../../JOB_SEEKER/components/Loader";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import ProfileModal from "../../JOB_SEEKER/components/modals/ProfileModal";
+import { openResume } from "../../utils/resume";
 
 const ViewAllApplicants = () => {
-  const [loadingStates, setLoadingStates] = useState<Record<number, 'approving' | 'rejecting' | null>>({});
+  const [loadingStates, setLoadingStates] = useState<Record<number, 'approving' | 'rejecting' | 'reverting' | null>>({});
+  const navigate = useNavigate();
   const [updateApplicationStatus] = useUpdateApplicationStatusMutation();
   const [page, setPage] = useState(1);
   const itemsPerPage = 2;
@@ -53,12 +57,17 @@ const ViewAllApplicants = () => {
     );
   }
 
-  async function handleApplicationStatus(id: number, status: 'approved' | 'rejected') {
-    setLoadingStates(prev => ({ ...prev, [id]: status === 'approved' ? 'approving' : 'rejecting' }));
+  async function handleApplicationStatus(id: number, status: 'approved' | 'rejected' | 'pending') {
+    const loadingKey = status === 'approved' ? 'approving' : status === 'rejected' ? 'rejecting' : 'reverting';
+    setLoadingStates(prev => ({ ...prev, [id]: loadingKey }));
     
     try {
       await updateApplicationStatus({ id, data: status }).unwrap();
-      toast.success(`Application ${status} successfully`);
+      toast.success(
+        status === "pending"
+          ? "Application reverted to pending"
+          : `Application ${status} successfully`
+      );
     } catch (error: any) {
       console.log("error in updating status", error.message);
       toast.error("Oops..!! something went wrong");
@@ -68,25 +77,29 @@ const ViewAllApplicants = () => {
   }
 
   return (
-    <Box sx={{ display: "flex", pb: 2 }}>
-      <EmployerSideBar />
-      <Container
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          maxWidth: "100vw",
-        }}
-      >
-        <Toolbar />
+    <MainLayout sidebar={<EmployerSideBar />}>
+      <Toolbar />
+      <Container maxWidth="xl" sx={{ py: 4, pt: { md: 0 }, px: { xs: 2.5, sm: 4 } }}>
+           <Button
+              startIcon={<AiOutlineArrowLeft />}
+              onClick={() => navigate(-1)}
+              sx={{
+                textTransform: "capitalize",
+                color: "#4f46e5",
+                fontWeight: 600,
+                mb: 1,
+              }}
+            >
+              Back
+            </Button>
         {data?.length > 0 ? (
-          <Box className="container mx-auto px-4 py-6">
+          <Box>
             <Typography
-              fontWeight={"bold"}
+              fontWeight={800}
               sx={{
                 fontSize: { xs: "25px", sm: "32px" },
                 mt: { xs: 2, sm: 0 },
-                background: "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
+                background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 lineHeight: 1.2,
@@ -99,12 +112,8 @@ const ViewAllApplicants = () => {
               color="text.secondary"
               sx={{ my: { xs: 1, sm: 2 } }}
             >
-              Here, you can view all the talented professionals who have applied
-              for your job postings. Each applicant brings unique skills,
-              experiences, and a passion for their field.
-              <Typography sx={{ mt: 0.5 }}>
-                Stay organized and make informed hiring decisions effortlessly!
-              </Typography>
+              Review talented professionals who applied for your job posting.
+              Approve or reject applications to keep candidates informed.
             </Typography>
 
             <Grid container spacing={3} mt={2}>
@@ -115,8 +124,15 @@ const ViewAllApplicants = () => {
                       height: "100%",
                       display: "flex",
                       flexDirection: "column",
-                      boxShadow: 3,
-                      borderRadius: 2,
+                      borderRadius: "18px",
+                      border: "1px solid #e2e8f0",
+                      boxShadow: "0 1px 3px rgba(30,41,59,0.06)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: "0 14px 34px rgba(79, 70, 229, 0.14)",
+                        borderColor: "#c7d2fe",
+                      },
                     }}
                   >
                     <CardContent sx={{ flexGrow: 1 }}>
@@ -143,15 +159,27 @@ const ViewAllApplicants = () => {
                               `https://avatar.iran.liara.run/public/boy?username=${applicant?.user.fullName}`
                             }
                             alt={applicant.user.fullName}
-                            className="w-16 h-16 object-fill rounded-full"
+                            className="w-16 h-16 object-cover rounded-full"
+                            style={{
+                              border: "3px solid #e9d5ff",
+                              boxShadow: "0 6px 16px rgba(139, 92, 246, 0.25)",
+                            }}
                           />
                         </Box>
 
                         <Box>
-                          <Typography variant="h6" fontWeight="bold">
+                          <Typography
+                            variant="h6"
+                            fontWeight={700}
+                            color="#1e293b"
+                          >
                             {applicant.user?.fullName || ""}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary">
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                          >
                             {applicant.user?.email || ""}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
@@ -161,28 +189,34 @@ const ViewAllApplicants = () => {
                       </Stack>
 
                       {applicant.user?.profile === null ? (
-                        <Typography>User hasn't set his profile</Typography>
+                        <Typography color="text.secondary" fontStyle="italic">
+                          User hasn't set his profile
+                        </Typography>
                       ) : (
                         <>
-                          {/* Tagline */}
                           {applicant?.user?.profile?.tagline && (
                             <Typography
                               variant="body1"
                               fontStyle="italic"
-                              color="text.secondary"
-                              mb={2}
+                              sx={{
+                                color: "#6d28d9",
+                                bgcolor: "#f5f3ff",
+                                borderRadius: "10px",
+                                p: 1.5,
+                                mb: 2,
+                              }}
                             >
                               "{applicant.user?.profile?.tagline}"
                             </Typography>
                           )}
 
-                          {/* Skills */}
                           {applicant.user?.profile?.skills?.length > 0 && (
                             <Box mb={2}>
                               <Typography
                                 variant="subtitle2"
-                                fontWeight="bold"
+                                fontWeight={700}
                                 mb={1}
+                                sx={{ color: "#1e293b" }}
                               >
                                 SkillSet:
                               </Typography>
@@ -192,8 +226,14 @@ const ViewAllApplicants = () => {
                                     <Chip
                                       key={index}
                                       label={skill}
-                                      color="primary"
                                       size="small"
+                                      sx={{
+                                        borderRadius: "8px",
+                                        bgcolor: "#f5f3ff",
+                                        color: "#6d28d9",
+                                        border: "1px solid #ddd6fe",
+                                        fontWeight: 600,
+                                      }}
                                     />
                                   )
                                 )}
@@ -201,13 +241,13 @@ const ViewAllApplicants = () => {
                             </Box>
                           )}
 
-                          {/* Bio */}
                           {applicant.user?.profile?.bio && (
                             <Box mb={2}>
                               <Typography
                                 variant="subtitle2"
-                                fontWeight="bold"
+                                fontWeight={700}
                                 mb={1}
+                                sx={{ color: "#1e293b" }}
                               >
                                 Cover Letter:
                               </Typography>
@@ -225,7 +265,8 @@ const ViewAllApplicants = () => {
                                       p: 0,
                                       ml: 0.5,
                                       minWidth: "auto",
-                                      color: "primary.main",
+                                      color: "#6d28d9",
+                                      fontWeight: 700,
                                     }}
                                     onClick={() => {
                                       setModalContent(
@@ -241,14 +282,25 @@ const ViewAllApplicants = () => {
                             </Box>
                           )}
 
-                          {/* Resume Button */}
                           {applicant?.user?.profile?.resume && (
                             <Button
                               variant="outlined"
-                              sx={{ textTransform: "capitalize", mb: 2 }}
+                              sx={{
+                                textTransform: "capitalize",
+                                mb: 2,
+                                borderRadius: "10px",
+                                color: "#6d28d9",
+                                borderColor: "#c4b5fd",
+                                fontWeight: 600,
+                                "&:hover": {
+                                  borderColor: "#6d28d9",
+                                  bgcolor: "#f5f3ff",
+                                },
+                              }}
                               color="primary"
-                              href={applicant.user.profile.resume}
-                              target="_blank"
+                              onClick={() =>
+                                openResume(applicant.user.profile.resume)
+                              }
                               size="small"
                             >
                               View Resume
@@ -264,7 +316,16 @@ const ViewAllApplicants = () => {
                         <Stack direction="row" spacing={1}>
                           <Button
                             variant="contained"
-                            sx={{ textTransform: "capitalize" }}
+                            sx={{
+                              textTransform: "capitalize",
+                              borderRadius: "10px",
+                              fontWeight: 700,
+                              background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                              boxShadow: "0 6px 14px rgba(34, 197, 94, 0.3)",
+                              "&:hover": {
+                                background: "linear-gradient(135deg, #22c55e, #15803d)",
+                              },
+                            }}
                             color="success"
                             disabled={loadingStates[applicant.id] === 'approving' || loadingStates[applicant.id] === 'rejecting'}
                             fullWidth
@@ -273,7 +334,7 @@ const ViewAllApplicants = () => {
                             }
                           >
                             {loadingStates[applicant.id] === 'approving' ? (
-                              <CircularProgress size={24} color="inherit" />
+                              <CircularProgress size={18} color="inherit" />
                             ) : (
                               "Approve"
                             )}
@@ -281,7 +342,16 @@ const ViewAllApplicants = () => {
                           <Button
                             variant="contained"
                             color="error"
-                            sx={{ textTransform: "capitalize" }}
+                            sx={{
+                              textTransform: "capitalize",
+                              borderRadius: "10px",
+                              fontWeight: 700,
+                              background: "linear-gradient(135deg, #f87171, #ef4444)",
+                              boxShadow: "0 6px 16px rgba(239, 68, 68, 0.3)",
+                              "&:hover": {
+                                background: "linear-gradient(135deg, #f87171, #dc2626)",
+                              },
+                            }}
                             disabled={loadingStates[applicant.id] === 'rejecting' || loadingStates[applicant.id] === 'approving'}
                             fullWidth
                             onClick={() =>
@@ -289,28 +359,129 @@ const ViewAllApplicants = () => {
                             }
                           >
                             {loadingStates[applicant.id] === 'rejecting' ? (
-                              <CircularProgress size={24} color="inherit" />
+                              <CircularProgress size={18} color="inherit" />
                             ) : (
                               "Reject"
                             )}
                           </Button>
                         </Stack>
                       ) : (
-                        <Button
-                          variant="contained"
-                          sx={{ textTransform: "capitalize" }}
-                          color={
-                            applicant.status === "approved"
-                              ? "success"
-                              : "error"
-                          }
-                          disabled
-                          fullWidth
-                        >
-                          {applicant.status === "approved"
-                            ? "Accepted"
-                            : "Rejected"}
-                        </Button>
+                        <Box>
+                          <Box
+                            sx={{
+                              borderRadius: "10px",
+                              py: 1,
+                              textAlign: "center",
+                              color: "white",
+                              fontWeight: 700,
+                              fontSize: "15px",
+                              background:
+                                applicant.status === "approved"
+                                  ? "linear-gradient(135deg, #22c55e, #16a34a)"
+                                  : "linear-gradient(135deg, #f87171, #ef4444)",
+                            }}
+                          >
+                            {applicant.status === "approved"
+                              ? "Accepted"
+                              : "Rejected"}
+                          </Box>
+                          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                            {applicant.status === "approved" ? (
+                              <Button
+                                variant="contained"
+                                color="error"
+                                sx={{
+                                  textTransform: "capitalize",
+                                  borderRadius: "10px",
+                                  fontWeight: 700,
+                                  fontSize: "13px",
+                                  background:
+                                    "linear-gradient(135deg, #f87171, #ef4444)",
+                                  boxShadow:
+                                    "0 6px 16px rgba(239, 68, 68, 0.3)",
+                                  "&:hover": {
+                                    background:
+                                      "linear-gradient(135deg, #f87171, #dc2626)",
+                                  },
+                                }}
+                                disabled={loadingStates[applicant.id] === 'rejecting' || loadingStates[applicant.id] === 'reverting'}
+                                fullWidth
+                                onClick={() =>
+                                  handleApplicationStatus(
+                                    applicant.id,
+                                    "rejected"
+                                  )
+                                }
+                              >
+                                {loadingStates[applicant.id] === 'rejecting' ? (
+                                  <CircularProgress size={18} color="inherit" />
+                                ) : (
+                                  "Reject"
+                                )}
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="contained"
+                                sx={{
+                                  textTransform: "capitalize",
+                                  borderRadius: "10px",
+                                  fontWeight: 700,
+                                  fontSize: "13px",
+                                  background:
+                                    "linear-gradient(135deg, #22c55e, #16a34a)",
+                                  boxShadow:
+                                    "0 6px 14px rgba(34, 197, 94, 0.3)",
+                                  "&:hover": {
+                                    background:
+                                      "linear-gradient(135deg, #22c55e, #15803d)",
+                                  },
+                                }}
+                                color="success"
+                                disabled={loadingStates[applicant.id] === 'approving' || loadingStates[applicant.id] === 'reverting'}
+                                fullWidth
+                                onClick={() =>
+                                  handleApplicationStatus(
+                                    applicant.id,
+                                    "approved"
+                                  )
+                                }
+                              >
+                                {loadingStates[applicant.id] === 'approving' ? (
+                                  <CircularProgress size={18} color="inherit" />
+                                ) : (
+                                  "Approve"
+                                )}
+                              </Button>
+                            )}
+                            <Button
+                              variant="outlined"
+                              sx={{
+                                textTransform: "capitalize",
+                                borderRadius: "10px",
+                                fontWeight: 700,
+                                fontSize: "13px",
+                                color: "#6d28d9",
+                                borderColor: "#c4b5fd",
+                                whiteSpace: "nowrap",
+                                "&:hover": {
+                                  borderColor: "#6d28d9",
+                                  bgcolor: "#f5f3ff",
+                                },
+                              }}
+                              disabled={loadingStates[applicant.id] === 'reverting'}
+                              fullWidth
+                              onClick={() =>
+                                handleApplicationStatus(applicant.id, "pending")
+                              }
+                            >
+                              {loadingStates[applicant.id] === 'reverting' ? (
+                                <CircularProgress size={18} color="inherit" />
+                              ) : (
+                                "Revert"
+                              )}
+                            </Button>
+                          </Stack>
+                        </Box>
                       )}
                     </Box>
                   </Card>
@@ -332,16 +503,36 @@ const ViewAllApplicants = () => {
             )}
           </Box>
         ) : (
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            textAlign="center"
-            mt={4}
-          >
-            No applicants have applied for this position yet.
-          </Typography>
+          <Box>
+            <Box
+              sx={{
+                width: 84,
+                height: 84,
+                borderRadius: "50%",
+                mx: "auto",
+                mb: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                boxShadow: "0 10px 24px rgba(99, 102, 241, 0.3)",
+                color: "#fff",
+                fontSize: "38px",
+              }}
+            >
+              <FaUsers />
+            </Box>
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              No applicants have applied for this position yet.
+            </Typography>
+          </Box>
         )}
 
+       </Container>
         {/* Bio Modal */}
         <Modal open={openModal} onClose={() => setOpenModal(false)}>
           <Box
@@ -364,7 +555,7 @@ const ViewAllApplicants = () => {
             {/* Header with gradient background */}
             <Box
               sx={{
-                background: "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
+                background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
                 p: 3,
                 color: "white",
               }}
@@ -573,12 +764,13 @@ const ViewAllApplicants = () => {
               )?.user?.profile?.resume && (
                 <Button
                   variant="contained"
-                  href={
-                    displayedApplicants.find(
-                      (a: any) => a.user?.profile?.bio === modalContent
-                    )?.user?.profile?.resume
+                  onClick={() =>
+                    openResume(
+                      displayedApplicants.find(
+                        (a: any) => a.user?.profile?.bio === modalContent
+                      )?.user?.profile?.resume
+                    )
                   }
-                  target="_blank"
                   sx={{ borderRadius: 2 }}
                 >
                   View Full Resume
@@ -594,8 +786,7 @@ const ViewAllApplicants = () => {
           setImageURL={setImageURL}
           setProfileModal={setProfileModal}
         />
-      </Container>
-    </Box>
+    </MainLayout>
   );
 };
 

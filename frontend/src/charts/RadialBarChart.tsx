@@ -1,6 +1,45 @@
-import { RadialBarChart, RadialBar, Legend, Tooltip } from "recharts";
+import {
+  RadialBarChart,
+  RadialBar,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { useGetAppliedJobsQuery } from "../JOB_SEEKER/Redux/API/JobsAPI";
 import { useFavourite } from "../JOB_SEEKER/zustand/useFavourite";
+
+interface TooltipPayload {
+  name?: string;
+  value?: number;
+}
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          background: "#fff",
+          border: "1px solid #e2e8f0",
+          borderRadius: "10px",
+          padding: "10px 14px",
+          boxShadow: "0 8px 20px rgba(30,41,59,0.12)",
+          fontSize: "13px",
+        }}
+      >
+        <strong style={{ color: "#1e293b" }}>{payload[0].name}</strong>
+        <div style={{ color: "#6d28d9", fontWeight: 600, marginTop: 4 }}>
+          {payload[0].value}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 const CustomRadialBarChart = () => {
   const { data: Applied_Jobs } = useGetAppliedJobsQuery();
@@ -17,48 +56,43 @@ const CustomRadialBarChart = () => {
   ).length;
 
   const jobStats = [
-    { name: "Pending Jobs", value: Pending_Jobs, fill: "#ffc658" },
-    {
-      name: "Favourite Jobs",
-      value: Favourite_Jobs?.length || 0,
-      fill: "#83a6ed",
-    },
-    { name: "Accepted Jobs", value: Accepted_Jobs, fill: "#8dd1e1" },
-    { name: "Rejected Jobs", value: Rejected_Jobs, fill: "#82ca9d" },
-    {
-      name: "Total Applied Jobs",
-      value: Applied_Jobs?.length || 0,
-      fill: "#a4de6c",
-    },
+    { name: "Total Applied Jobs", value: Applied_Jobs?.length || 0, fill: "#4f46e5" },
+    { name: "Pending Jobs", value: Pending_Jobs, fill: "#f59e0b" },
+    { name: "Favourite Jobs", value: Favourite_Jobs?.length || 0, fill: "#ec4899" },
+    { name: "Accepted Jobs", value: Accepted_Jobs, fill: "#22c55e" },
+    { name: "Rejected Jobs", value: Rejected_Jobs, fill: "#ef4444" },
   ];
 
   return (
-    <RadialBarChart
-      width={370}
-      height={250}
-      cx={90}
-      innerRadius="30%"
-      outerRadius="100%"
-      data={jobStats}
-      startAngle={180}
-      endAngle={0}
-    >
-      <RadialBar
-        label={{ fill: "#666", position: "insideTop" }}
-        background
-        dataKey="value"
-      />
-      <Legend
-        wrapperStyle={{ right: -10, top: 40 }}
-        iconSize={10}
-        width={160}
-        height={140}
-        layout="vertical"
-        verticalAlign="middle"
-        align="right"
-      />
-      <Tooltip />
-    </RadialBarChart>
+    <ResponsiveContainer width="100%" height={300}>
+      <RadialBarChart
+        data={jobStats}
+        cx="40%"
+        cy="50%"
+        innerRadius="28%"
+        outerRadius="85%"
+        startAngle={180}
+        endAngle={0}
+      >
+        <RadialBar
+          label={{ fill: "#94a3b8", fontSize: 11, position: "insideStart" }}
+          background={{ fill: "#eef2f7" }}
+          dataKey="value"
+          cornerRadius={6}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend
+          iconSize={10}
+          layout="vertical"
+          verticalAlign="middle"
+          align="right"
+          width={170}
+          formatter={(value) => (
+            <span style={{ color: "#475569", fontSize: 13 }}>{value}</span>
+          )}
+        />
+      </RadialBarChart>
+    </ResponsiveContainer>
   );
 };
 

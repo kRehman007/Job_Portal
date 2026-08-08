@@ -12,7 +12,7 @@ export const URL = {
   },
   EMPLOYER: {
     HOME: "/",
-    CREATE_JOB: "/create-job",
+    CREATE_JOB: "/post-job",
     VIEW_ALL_EMPLOYERS: "/view-all-applicants",
   },
 };

@@ -11,15 +11,16 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: "90%",
-  height: { xs: "100%", sm: "auto" },
-  overflow: { xs: "auto", sm: "none" },
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 2,
-  m: 3,
-  maxWidth: "400px",
-  mx: "auto",
+  maxWidth: "440px",
+  maxHeight: { xs: "94vh", sm: "90vh" },
+  overflowY: "auto",
+  bgcolor: "#ffffff",
+  borderRadius: "22px",
+  boxShadow: "0 24px 60px rgba(30, 27, 75, 0.3)",
+  border: "1px solid #e2e8f0",
+  p: 3,
+  m: 0,
+  outline: "none",
 };
 
 interface EditProps {
@@ -46,10 +47,8 @@ const EditModalopen: React.FC<EditProps> = ({
             timeout: 500,
           },
         }}
-        style={{
-          width: "100%",
-          height: "100vh",
-          overflowY: "auto",
+        sx={{
+          backdropFilter: "blur(4px)",
         }}
       >
         <Fade in={Editopen}>
