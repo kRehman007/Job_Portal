@@ -3,9 +3,11 @@ dotenv.config();
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 import userRoutes from "./routes/user-route";
 import jobRoutes from "./routes/job-routes";
 import { AuthUser } from "./middlewares/user-auth-middleware";
+import { UPLOADS_ROOT } from "./config/multer";
 
 const app: Express = express();
 
@@ -21,6 +23,27 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use("/uploads", express.static(UPLOADS_ROOT));
+
+app.get("/uploads-download/:folder/:name", (req: Request, res: Response) => {
+  const { folder, name } = req.params;
+  const allowedFolders = ["resume", "profile_picture", "company_logo"];
+  if (!allowedFolders.includes(folder)) {
+    res.status(400).json({ error: "Invalid folder" });
+    return;
+  }
+  if (!/^[A-Za-z0-9._-]+$/.test(name)) {
+    res.status(400).json({ error: "Invalid filename" });
+    return;
+  }
+  const filePath = path.join(UPLOADS_ROOT, folder, name);
+  res.download(filePath, name, (err: any) => {
+    if (err && !res.headersSent) {
+      res.status(404).json({ error: "File not found" });
+    }
+  });
+});
 
 //Routes...
 app.use("/api/validate-user", AuthUser, (req: Request, res: Response) => {

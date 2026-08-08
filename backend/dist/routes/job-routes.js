@@ -4,7 +4,7 @@ import { AuthUser, verifyRole } from "../middlewares/user-auth-middleware";
 import { Role } from "@prisma/client";
 import upload from "../config/multer";
 const router = express.Router();
-router.post("/create-job", AuthUser, upload.single("companyLogo"), verifyRole([Role.EMPLOYER, Role.ADMIN]), createJob);
+router.post("/post-job", AuthUser, upload.single("companyLogo"), verifyRole([Role.EMPLOYER, Role.ADMIN]), createJob);
 router.get("/delete-job/:jobId", AuthUser, verifyRole([Role.EMPLOYER]), deleteJob);
 router.get("/view-applicants/:id", AuthUser, verifyRole([Role.ADMIN, Role.EMPLOYER]), viewApplicants);
 router.post("/apply-job/:jobId", AuthUser, verifyRole([Role.JOB_SEEKER]), applyForJob);

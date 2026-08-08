@@ -1,39 +1,55 @@
 import multer from "multer";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "./cloudinary";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { Request } from "express";
 
-console.log("Multer Configuration Loaded");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    console.log("Processing File:", file); // ✅ Check if the file is received
-    if (!file) {
-      console.log("File not found in Multer middleware");
-      throw new Error("No file provided");
-    }
-   console.log("File fieldname:", file.fieldname); // ✅ Check the fieldname
-    return {
-      folder:
-        file.fieldname === "profilePic"
-          ? "profile_picture"
-          : file.fieldname === "resume"
-          ? "resume"
-          : file.fieldname === "companyLogo"
-          ? "company_logo"
-          : "other",
-      public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
-      format: file.mimetype.split("/")[1], // Ensure correct format
-      resource_type: file.mimetype === "application/pdf" ? "raw" : "auto",
-    };
+export const UPLOADS_ROOT = path.resolve(__dirname, "../../uploads");
+
+export const getUploadDir = (fieldname: string): string => {
+  if (fieldname === "profilePic") return "profile_picture";
+  if (fieldname === "resume") return "resume";
+  return "company_logo";
+};
+
+export const buildPublicUrl = (
+  req: Request,
+  file: Express.Multer.File
+): string =>
+  `${req.protocol}://${req.get("host")}/uploads/${getUploadDir(
+    file.fieldname
+  )}/${file.filename}`;
+
+const ALLOWED_RESUME_TYPES = ["application/pdf"];
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(UPLOADS_ROOT, getUploadDir(file.fieldname));
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || "";
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   },
 });
 
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    console.log("File Received:", file.originalname);
-    cb(null, true); // Accept file
+    const isResume =
+      file.fieldname === "resume" &&
+      ALLOWED_RESUME_TYPES.includes(file.mimetype);
+    const isImage =
+      file.fieldname !== "resume" && file.mimetype.startsWith("image/");
+    if (isResume || isImage) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Unsupported file type"));
   },
 });
+
 export default upload;

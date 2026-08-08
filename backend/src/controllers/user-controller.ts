@@ -3,8 +3,27 @@ import prisma from "../db/prisma";
 import bcryptjs from "bcryptjs";
 import { generateToken } from "../utils/generateTokenForUser";
 import { Role } from "@prisma/client";
+import path from "path";
+import fs from "fs";
+import { UPLOADS_ROOT, buildPublicUrl } from "../config/multer";
 import cloudinary, { getCloudinaryPublicIdFromUrl } from "../config/cloudinary";
 // import redis from "../config/redisClient";
+
+const deleteFileIfExists = async (fileUrl?: string | null) => {
+  if (!fileUrl) return;
+  const marker = "/uploads/";
+  const idx = fileUrl.indexOf(marker);
+  if (idx !== -1) {
+    const relativePath = fileUrl.slice(idx + marker.length);
+    const absPath = path.join(UPLOADS_ROOT, relativePath);
+    fs.unlink(absPath, () => {});
+    return;
+  }
+  if (fileUrl.includes("res.cloudinary.com")) {
+    const publicId = getCloudinaryPublicIdFromUrl(fileUrl);
+    if (publicId) await cloudinary.uploader.destroy(publicId);
+  }
+};
 
 export const userSignup = async (req: Request, res: Response) => {
   const { email, password, role, fullName } = req.body;
@@ -114,19 +133,13 @@ export const UpdateUserProfile = async (req: Request, res: Response) => {
     let profilePicURL = existingProfile?.profilePic;
     let resumeURL = existingProfile?.resume;
     if (req.files && "profilePic" in req.files) {
-      profilePicURL = req.files.profilePic[0].path;
+      profilePicURL = buildPublicUrl(req, req.files.profilePic[0]);
     }
     if (req.files && "resume" in req.files) {
-      resumeURL = req.files.resume[0].path;
+      resumeURL = buildPublicUrl(req, req.files.resume[0]);
     }
-    if (existingProfile?.profilePic) {
-      const publicId = getCloudinaryPublicIdFromUrl(existingProfile.profilePic);
-      if (publicId) await cloudinary.uploader.destroy(publicId);
-    }
-    if (existingProfile?.resume) {
-      const publicId = getCloudinaryPublicIdFromUrl(existingProfile.resume);
-      if (publicId) await cloudinary.uploader.destroy(publicId);
-    }
+    await deleteFileIfExists(existingProfile?.profilePic);
+    await deleteFileIfExists(existingProfile?.resume);
 
     const updatedProfile = await prisma.profile.upsert({
       where: { userId },

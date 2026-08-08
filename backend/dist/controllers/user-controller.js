@@ -91,8 +91,10 @@ export const userLogout = (req, res) => {
     }
 };
 export const UpdateUserProfile = async (req, res) => {
+    console.log("req.files", req.files);
     const userId = req.user?.id;
     const { bio, experience, skills, tagline, phoneNumber, gender } = req.body;
+    console.log("req.body", req.body);
     if (!req.files) {
         res.status(400).json({ error: "No file uploaded" });
         return;
@@ -144,6 +146,7 @@ export const UpdateUserProfile = async (req, res) => {
             },
         });
         // await redis.del(`profile-${req.user.id}`);
+        console.log("updatedProfile", updatedProfile);
         res.status(201).json(updatedProfile);
         return;
     }

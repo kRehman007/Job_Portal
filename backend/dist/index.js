@@ -24,5 +24,12 @@ app.use("/api/validate-user", AuthUser, (req, res) => {
 });
 app.use("/api/user", userRoutes);
 app.use("/api/job", jobRoutes);
+app.use((err, req, res, next) => {
+    console.error("GLOBAL ERROR:");
+    res.status(500).json({
+        message: err.message,
+        error: err,
+    });
+});
 const port = process.env.PORT || 5001;
 app.listen(port, () => console.log(`Server is running at port no ${port}`));

@@ -16,7 +16,7 @@ import { cacheMiddleware } from "../middlewares/cache-middleware";
 const router = express.Router();
 
 router.post(
-  "/create-job",
+  "/post-job",
   AuthUser,
   upload.single("companyLogo"),
   verifyRole([Role.EMPLOYER, Role.ADMIN]),

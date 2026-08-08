@@ -143,6 +143,16 @@ export const applyForJob = async (req, res) => {
             res.status(400).json({ error: "job not found" });
             return;
         }
+        const existingApplication = await prisma.jobApplication.findFirst({
+            where: {
+                userId: parseInt(req.user.id),
+                jobId: parseInt(jobId),
+            },
+        });
+        if (existingApplication) {
+            res.status(400).json({ error: "You have already applied for this job" });
+            return;
+        }
         await prisma.jobApplication.create({
             data: {
                 userId: parseInt(req.user.id),
@@ -169,7 +179,7 @@ export const updateApplicationStatus = async (req, res) => {
         res.status(400).json({ error: "Status or Id is required" });
         return;
     }
-    if (!["approved", "rejected"].includes(status)) {
+    if (!["approved", "rejected", "pending"].includes(status)) {
         res.status(404).json({ error: "Invalid status" });
         return;
     }
@@ -185,10 +195,12 @@ export const updateApplicationStatus = async (req, res) => {
             res.status(404).json({ error: "Application not found" });
             return;
         }
-        const emailMessage = status === "approved"
-            ? `Congratulations! Your application for ${application.job.title} has been approved.`
-            : `We're sorry! Your application for ${application.job.title} was rejected.`;
-        await sendEmailForAcceptingAndRejecting(application.user.email, `Job Application ${status}`, emailMessage);
+        if (status !== "pending") {
+            const emailMessage = status === "approved"
+                ? `Congratulations! Your application for ${application.job.title} has been approved.`
+                : `We're sorry! Your application for ${application.job.title} was rejected.`;
+            await sendEmailForAcceptingAndRejecting(application.user.email, `Job Application ${status}`, emailMessage);
+        }
         // await redis.del(`applied-jobs-${req.user.id}`);
         // await redis.del(`applicants-${id}`);
         res.status(200).json({ message: `Application ${status} successfully` });
