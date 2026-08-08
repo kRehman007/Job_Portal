@@ -416,7 +416,7 @@ const UserProfile = () => {
                     `https://avatar.iran.liara.run/public/boy?username=${data?.fullName}`
                   }
                   alt="Profile"
-                  className="w-20 h-20 object-fill rounded-full"
+                  className="w-20 h-20 object-fill rounded-full border-1 border-blue-500"
                 />
               </Box>
 

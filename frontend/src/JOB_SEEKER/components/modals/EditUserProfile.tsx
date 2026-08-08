@@ -195,11 +195,11 @@ const EditUserProfile: React.FC<Props> = ({ handleEditModalClose }) => {
             data?.profile?.profilePic ||
             `https://avatar.iran.liara.run/public/boy?username=${data?.fullName}`
           }
-          className="w-20 h-20 rounded-full object-fill"
+          className="w-20 h-20 rounded-full object-fill border-1 border-blue-500"
         />
         {errors.profilePic && (
           <Typography variant="body2" color="error">
-            {errors.profilePic.message as string}
+            {errors.profilePic.message as string} 
           </Typography>
         )}
 

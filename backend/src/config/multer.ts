@@ -12,7 +12,7 @@ const storage = new CloudinaryStorage({
       console.log("File not found in Multer middleware");
       throw new Error("No file provided");
     }
-
+   console.log("File fieldname:", file.fieldname); // ✅ Check the fieldname
     return {
       folder:
         file.fieldname === "profilePic"

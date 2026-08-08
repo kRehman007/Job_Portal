@@ -1,44 +1,28 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, { Express, Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user-route";
 import jobRoutes from "./routes/job-routes";
 import { AuthUser } from "./middlewares/user-auth-middleware";
-
-const app: Express = express();
-
+const app = express();
 //Middlewares...
-app.use(
-  cors({
+app.use(cors({
     origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: "Content-Type,Authorization",
-  })
-);
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 //Routes...
-app.use("/api/validate-user", AuthUser, (req: Request, res: Response) => {
-  res.status(200).json(req.user);
-  return;
+app.use("/api/validate-user", AuthUser, (req, res) => {
+    res.status(200).json(req.user);
+    return;
 });
-
 app.use("/api/user", userRoutes);
 app.use("/api/job", jobRoutes);
-
-app.use((err: any, req: Request, res: Response, next: any) => {
-  console.error("GLOBAL ERROR:");
-
-  res.status(500).json({
-    message: err.message,
-    error: err,
-  });
-});
 const port = process.env.PORT || 5001;
-
 app.listen(port, () => console.log(`Server is running at port no ${port}`));

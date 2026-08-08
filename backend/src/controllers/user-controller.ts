@@ -98,9 +98,10 @@ export const userLogout = (req: Request, res: Response) => {
 };
 
 export const UpdateUserProfile = async (req: Request, res: Response) => {
+  console.log("req.files", req.files);
   const userId = req.user?.id;
   const { bio, experience, skills, tagline, phoneNumber, gender } = req.body;
-
+  console.log("req.body", req.body);
   if (!req.files) {
     res.status(400).json({ error: "No file uploaded" });
     return;
@@ -152,6 +153,7 @@ export const UpdateUserProfile = async (req: Request, res: Response) => {
       },
     });
     // await redis.del(`profile-${req.user.id}`);
+    console.log("updatedProfile", updatedProfile);
     res.status(201).json(updatedProfile);
     return;
   } catch (error: any) {
