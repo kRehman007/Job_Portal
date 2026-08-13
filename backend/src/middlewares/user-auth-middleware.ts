@@ -20,15 +20,13 @@ export const AuthUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({
-      error: "Unauthorized",
-    });
+  const token = req.headers["authorization"]?.split(" ")[1];
+
+  if (!token) {
+    res.status(401).json({ error: "unAuthorized" });
+    return;
   }
-
-  const token = authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(
@@ -37,15 +35,12 @@ export const AuthUser = async (
     ) as DecodedToken;
 
     if (!decoded.userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      res.status(401).json({ error: "unAuthorized as Token expired " });
+      return;
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: Number(decoded.userId),
-      },
+      where: { id: Number(decoded.userId) },
       select: {
         id: true,
         fullName: true,
@@ -53,34 +48,23 @@ export const AuthUser = async (
         role: true,
       },
     });
-
     if (!user) {
-      return res.status(403).json({
-        error: "Unauthorized, user does not exist",
-      });
+      res.status(403).json({ error: "unAuthorized, user does not exists" });
+      return;
     }
-
     req.user = user;
 
     next();
   } catch (error: any) {
-    console.error("Error in user-auth-middleware:", error);
-
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        error: "Token expired",
-      });
-    }
-
+    console.error("error in user-auth-middleware", error);
     if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        error: "Invalid token",
-      });
+      res.status(401).json({ error: "Invalid token" });
+      return;
     }
-
-    return res.status(500).json({
-      error: "Authentication error",
-    });
+    if (error.name === "TokenExpiredError") {
+      res.status(401).json({ error: "Token expired" });
+      return;
+    }
   }
 };
 

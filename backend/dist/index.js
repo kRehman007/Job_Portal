@@ -20,6 +20,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/uploads", express.static(UPLOADS_ROOT));
+app.get("/", (req, res) => {
+    res.send("Welcome to the Job Portal API");
+    return;
+});
 app.get("/uploads-download/:folder/:name", (req, res) => {
     const { folder, name } = req.params;
     const allowedFolders = ["resume", "profile_picture", "company_logo"];
