@@ -10,7 +10,7 @@ export function getToken(): string | null {
 
 
 const AxiosInstance = axios.create({
-  baseURL: "http://127.0.0.1:5000/api/",
+  baseURL: `${import.meta.env.VITE_BACKEND_URI}/api/`,
   headers: {
     "Content-Type": "application/json",
   },
