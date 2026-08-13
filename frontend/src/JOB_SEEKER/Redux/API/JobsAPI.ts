@@ -4,7 +4,7 @@ import { getToken } from "../../../utils/AxiosInstance";
 export const JobsAPI = createApi({
   reducerPath: "JobsAPI",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api/",
+    baseUrl: `${import.meta.env.VITE_BACKEND_URI}/api/`,
     credentials: "include",
     prepareHeaders: (headers) => {
       headers.set("Authorization", `Bearer ${getToken()}`);
