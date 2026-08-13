@@ -3,13 +3,15 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import userRoutes from "./routes/user-route";
-import jobRoutes from "./routes/job-routes";
-import { AuthUser } from "./middlewares/user-auth-middleware";
+import path from "path";
+import userRoutes from "./routes/user-route.js";
+import jobRoutes from "./routes/job-routes.js";
+import { AuthUser } from "./middlewares/user-auth-middleware.js";
+import { UPLOADS_ROOT } from "./config/multer.js";
 const app = express();
 //Middlewares...
 app.use(cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: [process.env.FRONTEND_URI || "http://localhost:5173"],
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: "Content-Type,Authorization",
@@ -17,6 +19,25 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/uploads", express.static(UPLOADS_ROOT));
+app.get("/uploads-download/:folder/:name", (req, res) => {
+    const { folder, name } = req.params;
+    const allowedFolders = ["resume", "profile_picture", "company_logo"];
+    if (!allowedFolders.includes(folder)) {
+        res.status(400).json({ error: "Invalid folder" });
+        return;
+    }
+    if (!/^[A-Za-z0-9._-]+$/.test(name)) {
+        res.status(400).json({ error: "Invalid filename" });
+        return;
+    }
+    const filePath = path.join(UPLOADS_ROOT, folder, name);
+    res.download(filePath, name, (err) => {
+        if (err && !res.headersSent) {
+            res.status(404).json({ error: "File not found" });
+        }
+    });
+});
 //Routes...
 app.use("/api/validate-user", AuthUser, (req, res) => {
     res.status(200).json(req.user);

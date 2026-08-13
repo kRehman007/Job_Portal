@@ -1,8 +1,28 @@
-import prisma from "../db/prisma";
+import prisma from "../db/prisma.js";
 import bcryptjs from "bcryptjs";
-import { generateToken } from "../utils/generateTokenForUser";
-import cloudinary, { getCloudinaryPublicIdFromUrl } from "../config/cloudinary";
+import { generateToken } from "../utils/generateTokenForUser.js";
+import path from "path";
+import fs from "fs";
+import { UPLOADS_ROOT, buildPublicUrl } from "../config/multer.js";
+import cloudinary, { getCloudinaryPublicIdFromUrl } from "../config/cloudinary.js";
 // import redis from "../config/redisClient";
+const deleteFileIfExists = async (fileUrl) => {
+    if (!fileUrl)
+        return;
+    const marker = "/uploads/";
+    const idx = fileUrl.indexOf(marker);
+    if (idx !== -1) {
+        const relativePath = fileUrl.slice(idx + marker.length);
+        const absPath = path.join(UPLOADS_ROOT, relativePath);
+        fs.unlink(absPath, () => { });
+        return;
+    }
+    if (fileUrl.includes("res.cloudinary.com")) {
+        const publicId = getCloudinaryPublicIdFromUrl(fileUrl);
+        if (publicId)
+            await cloudinary.uploader.destroy(publicId);
+    }
+};
 export const userSignup = async (req, res) => {
     const { email, password, role, fullName } = req.body;
     if (!email || !password || !role || !fullName) {
@@ -106,21 +126,13 @@ export const UpdateUserProfile = async (req, res) => {
         let profilePicURL = existingProfile?.profilePic;
         let resumeURL = existingProfile?.resume;
         if (req.files && "profilePic" in req.files) {
-            profilePicURL = req.files.profilePic[0].path;
+            profilePicURL = buildPublicUrl(req, req.files.profilePic[0]);
         }
         if (req.files && "resume" in req.files) {
-            resumeURL = req.files.resume[0].path;
+            resumeURL = buildPublicUrl(req, req.files.resume[0]);
         }
-        if (existingProfile?.profilePic) {
-            const publicId = getCloudinaryPublicIdFromUrl(existingProfile.profilePic);
-            if (publicId)
-                await cloudinary.uploader.destroy(publicId);
-        }
-        if (existingProfile?.resume) {
-            const publicId = getCloudinaryPublicIdFromUrl(existingProfile.resume);
-            if (publicId)
-                await cloudinary.uploader.destroy(publicId);
-        }
+        await deleteFileIfExists(existingProfile?.profilePic);
+        await deleteFileIfExists(existingProfile?.resume);
         const updatedProfile = await prisma.profile.upsert({
             where: { userId },
             update: {

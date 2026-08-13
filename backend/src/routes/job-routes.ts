@@ -8,11 +8,11 @@ import {
   getAppliedJobs,
   GetJobsOfEmployer,
   deleteJob,
-} from "../controllers/job-controller";
-import { AuthUser, verifyRole } from "../middlewares/user-auth-middleware";
+} from "../controllers/job-controller.js";
+import { AuthUser, verifyRole } from "../middlewares/user-auth-middleware.js";
 import { Role } from "@prisma/client";
-import upload from "../config/multer";
-import { cacheMiddleware } from "../middlewares/cache-middleware";
+import upload from "../config/multer.js";
+import { cacheMiddleware } from "../middlewares/cache-middleware.js";
 const router = express.Router();
 
 router.post(

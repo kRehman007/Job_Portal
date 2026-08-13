@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import prisma from "../db/prisma";
+import prisma from "../db/prisma.js";
 import bcryptjs from "bcryptjs";
-import { generateToken } from "../utils/generateTokenForUser";
+import { generateToken } from "../utils/generateTokenForUser.js";
 import { Role } from "@prisma/client";
 import path from "path";
 import fs from "fs";
-import { UPLOADS_ROOT, buildPublicUrl } from "../config/multer";
-import cloudinary, { getCloudinaryPublicIdFromUrl } from "../config/cloudinary";
+import { UPLOADS_ROOT, buildPublicUrl } from "../config/multer.js";
+import cloudinary, { getCloudinaryPublicIdFromUrl } from "../config/cloudinary.js";
 // import redis from "../config/redisClient";
 
 const deleteFileIfExists = async (fileUrl?: string | null) => {

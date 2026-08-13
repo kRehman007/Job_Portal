@@ -1,5 +1,6 @@
-import prisma from "../db/prisma";
-import { sendEmailForAcceptingAndRejecting, sendEmailForApplying, } from "../utils/sendEmail";
+import prisma from "../db/prisma.js";
+import { sendEmailForAcceptingAndRejecting, sendEmailForApplying, } from "../utils/sendEmail.js";
+import { buildPublicUrl } from "../config/multer.js";
 export const createJob = async (req, res) => {
     const { title, description, location, salary, skills, companyName, companyEmail, seats, jobType, experience, } = req.body;
     const employerId = req.user.id;
@@ -21,7 +22,7 @@ export const createJob = async (req, res) => {
     try {
         let companyLogoURL;
         if (req.file) {
-            companyLogoURL = req.file.path;
+            companyLogoURL = buildPublicUrl(req, req.file);
         }
         const createdJob = await prisma.job.create({
             data: {
@@ -238,7 +239,11 @@ export const getAppliedJobs = async (req, res) => {
         const jobs = await prisma.jobApplication.findMany({
             where: { userId: userId },
             include: {
-                job: true,
+                job: {
+                    include: {
+                        employer: true,
+                    },
+                },
             },
         });
         // await redis.set(`applied-jobs-${req.user.id}`, JSON.stringify(jobs), {

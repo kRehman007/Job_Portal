@@ -4,17 +4,17 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import userRoutes from "./routes/user-route";
-import jobRoutes from "./routes/job-routes";
-import { AuthUser } from "./middlewares/user-auth-middleware";
-import { UPLOADS_ROOT } from "./config/multer";
+import userRoutes from "./routes/user-route.js";
+import jobRoutes from "./routes/job-routes.js";
+import { AuthUser } from "./middlewares/user-auth-middleware.js";
+import { UPLOADS_ROOT } from "./config/multer.js";
 
 const app: Express = express();
 
 //Middlewares...
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: [process.env.FRONTEND_URI || "http://localhost:5173"],
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: "Content-Type,Authorization",

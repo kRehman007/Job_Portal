@@ -5,9 +5,9 @@ import {
   userSignup,
   UpdateUserProfile,
   getUserProfile,
-} from "../controllers/user-controller";
-import { AuthUser } from "../middlewares/user-auth-middleware";
-import upload from "../config/multer";
+} from "../controllers/user-controller.js";
+import { AuthUser } from "../middlewares/user-auth-middleware.js";
+import upload from "../config/multer.js";
 const router = express.Router();
 router.post("/signup", userSignup);
 router.post("/login", userLogin);

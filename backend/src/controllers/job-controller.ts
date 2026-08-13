@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import prisma from "../db/prisma";
+import prisma from "../db/prisma.js";
 import {
   sendEmailForAcceptingAndRejecting,
   sendEmailForApplying,
-} from "../utils/sendEmail";
-import redis from "../config/redisClient";
-import { buildPublicUrl } from "../config/multer";
+} from "../utils/sendEmail.js";
+import redis from "../config/redisClient.js";
+import { buildPublicUrl } from "../config/multer.js";
 
 export const createJob = async (req: Request, res: Response) => {
   const {

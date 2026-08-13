@@ -1,4 +1,4 @@
-import redis from "../config/redisClient";
+import redis from "../config/redisClient.js";
 export const cacheMiddleware = (key) => async (req, res, next) => {
     try {
         const cachedData = await redis.get(key);
